@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: real-bench
+spec:
+  selector:
+    app: real-bench
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

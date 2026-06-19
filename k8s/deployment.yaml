@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: real-bench
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: real-bench
+  template:
+    metadata:
+      labels:
+        app: real-bench
+    spec:
+      containers:
+        - name: web
+          image: ghcr.io/hugogu/real-bench:latest
+          ports:
+            - name: http
+              containerPort: 3000
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
