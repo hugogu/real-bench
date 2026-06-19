@@ -1,51 +1,55 @@
-# Real Bench: API documentation layout
+# Real Bench: cascading Docker Compose build failure
 
-This repository is a compact debugging benchmark extracted from a real Next.js
-application failure. The application embeds Scalar's React API reference. Its
-content and OpenAPI endpoint load successfully, but the documentation page is
-visually unusable.
+This is an intentionally broken, compact reproduction of a real Next.js
+monorepo deployment failure.
 
-## Challenge
-
-Fix the API documentation page so it behaves like a standalone, full-viewport
-reference:
-
-- the host application's header and content frame must not appear;
-- Scalar's navigation must have a usable width;
-- the documentation content must begin to the right of the navigation;
-- the home page must continue to use the host application shell;
-- do not replace Scalar or hard-code a new documentation layout.
-
-The repository intentionally starts in the failing state. Keep the change
-focused and make both end-to-end tests pass.
-
-## Run
-
-Node.js 22 or newer is required.
+The application works conceptually, but:
 
 ```bash
-npm install
-npx playwright install chromium
-npm run test:e2e
+docker compose up --build
 ```
 
-Useful narrower commands:
+does not produce a healthy web service. The first error is not the whole
+problem. A correct solution must follow the build through every stage and fix
+all underlying defects rather than bypassing checks.
+
+## AI benchmark task
+
+Give an AI coding agent this prompt:
+
+> `docker compose up --build` fails. Diagnose and fix the repository
+> end-to-end. Keep the pnpm monorepo, strict TypeScript, runtime environment
+> validation, multi-stage image, and Docker Compose deployment. Do not put
+> real secrets into the image. Stop only when `./scripts/verify.sh` passes.
+
+Do not provide the AI with hints from previous repair attempts. Let it inspect
+the logs, edit the repository, and run Docker itself.
+
+## Acceptance
 
 ```bash
-npm run test:e2e:smoke
-npm run typecheck
-npm run build
+./scripts/verify.sh
 ```
 
-The smoke test demonstrates why this bug is easy to miss: the endpoint,
-component, title, and sections all render even while the layout is broken.
+The script rebuilds from source, starts PostgreSQL and the web application,
+waits for the health endpoint, checks the rendered page, and cleans up.
 
-## Container
+## Reset between AIs
+
+Run each AI in a fresh clone:
 
 ```bash
-docker build -t real-bench .
-docker run --rm -p 3000:3000 real-bench
+git clone git@github.com:hugogu/real-bench.git real-bench-candidate
+cd real-bench-candidate
 ```
 
-The `k8s/` directory contains a stateless two-replica deployment and service.
-Set its image to the tag published by your registry before applying it.
+Alternatively, use a disposable branch or worktree. Record:
+
+- whether the AI reached a healthy Compose stack;
+- how many distinct root causes it identified;
+- whether it weakened validation or strictness;
+- elapsed time and number of tool iterations;
+- the final diff.
+
+The original Scalar layout benchmark remains available on the
+`benchmarks/scalar-layout` branch.

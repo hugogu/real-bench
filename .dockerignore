@@ -1,6 +1,7 @@
 .git
 .next
+**/.next
 node_modules
-playwright-report
+**/node_modules
+coverage
 test-results
-*.log
